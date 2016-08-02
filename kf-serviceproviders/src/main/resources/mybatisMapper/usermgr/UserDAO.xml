@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hshc.kfdao.dao.usermgr.UserDAO" >
+	
+	<resultMap id="userMap" type="com.hshc.kfpub.model.CommLoginModel">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="login_name" property="loginName" jdbcType="VARCHAR"/>
+        <result column="login_pwd" property="loginPwd" jdbcType="VARCHAR"/>
+        <result column="valid_start_date" property="validStartDate" jdbcType="TIMESTAMP"/>
+        <result column="valid_end_date" property="validEndDate" jdbcType="TIMESTAMP"/>
+        <result column="is_del" property="isDel" jdbcType="VARCHAR"/>
+        <collection property="deptList" columnPrefix="d_" resultMap="com.hshc.kfdao.dao.usermgr.DeptDAO.deptMap"/>
+        <collection property="roleList" columnPrefix="r_" resultMap="com.hshc.kfdao.dao.usermgr.RoleDAO.roleMap"/>
+        <collection property="loginLogList" columnPrefix="l_" resultMap="com.hshc.kfdao.dao.usermgr.LoginLogDAO.loginLogMap"/>
+        <collection property="privilegeList" columnPrefix="p_" resultMap="com.hshc.kfdao.dao.usermgr.PrivilegeDAO.privMap"/>
+    </resultMap>
+
+	<resultMap id="userMapNoLink" type="com.hshc.kfpub.model.CommLoginModel">
+		<id column="id" property="id" jdbcType="INTEGER"/>
+		<result column="login_name" property="loginName" jdbcType="VARCHAR"/>
+		<result column="login_pwd" property="loginPwd" jdbcType="VARCHAR"/>
+		<result column="valid_start_date" property="validStartDate" jdbcType="TIMESTAMP"/>
+		<result column="valid_end_date" property="validEndDate" jdbcType="TIMESTAMP"/>
+		<result column="is_del" property="isDel" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="columns">
+		tcl.id, tcl.login_name, tcl.login_pwd, tcl.valid_start_date, tcl.valid_end_date, tcl.is_del
+	</sql>
+
+	<select id="selectWithRoleFlag" resultMap="userMap" parameterType="integer">
+		select <include refid="columns"/>, lr.role_id r_id
+		from t_comm_login tcl
+		left outer join t_comm_login_role lr
+		on tcl.id = lr.login_id
+		where (lr.role_id = #{roleId, jdbcType=INTEGER} OR lr.role_id IS NULL) and tcl.is_del = 0
+	</select>
+
+	<!-- 根据用户名查询用户记录 -->
+	<select id="selectByUserName" resultMap="userMap" parameterType="string">
+		select tcl.id id,
+		     tcl.login_name login_name,
+			 tcl.login_pwd login_pwd,
+			 tcl.valid_start_date valid_start_date,
+			 tcl.valid_end_date valid_end_date,
+			 tcl.is_del is_del,
+		
+			 tcd.id d_id,
+			 tcd.code d_code,
+			 tcd.name d_name,
+
+			 tcp.priv_code p_priv_code,
+
+			 tcr.id r_id,
+			 tcr.role_code r_role_code,
+			 tcr.role_name r_role_name
+
+		from t_comm_login tcl
+
+		join t_comm_login_dept tcld on tcld.login_id = tcl.id
+		join t_comm_dept tcd on tcd.id = tcld.dept_id
+
+		left join t_comm_login_privileges tclp on tclp.login_id = tcl.id
+		left join t_comm_privileges tcp on tcp.id = tclp.priv_id
+
+		left join t_comm_login_role tclr on tclr.login_id = tcld.login_id
+		left join t_comm_role tcr on tcr.id = tclr.role_id
+		where tcl.login_name = #{loginName,jdbcType=VARCHAR}
+		
+		union all 
+
+		select tcl1.id id,
+			   tcl1.login_name login_name,
+				 tcl1.login_pwd login_pwd,
+				 tcl1.valid_start_date valid_start_date,
+				 tcl1.valid_end_date valid_end_date,
+				 tcl1.is_del is_del,
+			
+				 tcd1.id d_id,
+				 tcd1.code d_code,
+				 tcd1.name d_name,
+	
+				 tcp1.priv_code p_priv_code,
+	
+				 tcr1.id r_id,
+				 tcr1.role_code r_role_code,
+				 tcr1.role_name r_role_name
+			from t_comm_login tcl1
+	
+			join t_comm_login_dept tcld1 on tcld1.login_id = tcl1.id
+			join t_comm_dept tcd1 on tcd1.id = tcld1.dept_id
+	
+			left join t_comm_login_role tclr1 on tclr1.login_id = tcld1.login_id
+			left join t_comm_role tcr1 on tcr1.id = tclr1.role_id
+	
+			left join t_comm_role_privileges tcrp1 on tcrp1.role_id = tcr1.id
+			left join t_comm_privileges tcp1 on tcp1.id = tcrp1.priv_id
+			
+			where tcl1.login_name = #{loginName,jdbcType=VARCHAR}
+	</select>
+	
+	    <!-- 根据用户名查询用户记录 -->
+	<select id="selectPwdByUserName" resultType="string" parameterType="string">
+		select  login_pwd from t_comm_login  where login_name = #{loginName,jdbcType=VARCHAR}
+	</select>
+    
+	<!-- 根据ID查询用户记录 -->
+	<select id="selectById" resultMap="userMap" parameterType="integer">
+		select tcl.id id,
+		     tcl.login_name login_name,
+			 tcl.login_pwd login_pwd,
+			 tcl.valid_start_date valid_start_date,
+			 tcl.valid_end_date valid_end_date,
+			 tcl.is_del is_del,
+		
+			 tcd.id d_id,
+			 tcd.code d_code,
+			 tcd.name d_name,
+
+			 tcp.priv_code p_priv_code,
+
+			 tcr.id r_id,
+			 tcr.role_code r_role_code,
+			 tcr.role_name r_role_name
+
+		from t_comm_login tcl
+
+		join t_comm_login_dept tcld on tcld.login_id = tcl.id
+		join t_comm_dept tcd on tcd.id = tcld.dept_id
+
+		join t_comm_login_privileges tclp on tclp.login_id = tcl.id
+		join t_comm_privileges tcp on tcp.id = tclp.priv_id
+
+		join t_comm_login_role tclr on tclr.login_id = tcld.login_id
+		join t_comm_role tcr on tcr.id = tclr.role_id
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	
+	<!-- 根据查询条件，分页查询记录 -->
+	<select id="selectByParams" resultMap="userMap" parameterType="com.hshc.kfpub.model.CommLoginModel">
+		 select login_name,
+				 login_pwd,
+				 valid_start_date,
+				 valid_end_date,
+				 is_del
+			from t_comm_login 
+			where 1=1
+			 <if test="loginName != null">
+               and login_name = #{loginName, jdbcType=VARCHAR}
+            </if>
+            <if test="loginPwd != null">
+               and  login_pwd = #{loginPwd, jdbcType=VARCHAR}
+            </if>
+            <if test="status != null">
+               and  status = #{status, jdbcType=VARCHAR}
+            </if>
+            <if test="validStartDate != null">
+               and  valid_start_date = #{validStartDate, jdbcType=TIMESTAMP}
+            </if>
+            <if test="validEndDate != null">
+               and  valid_end_date = #{validEndDate, jdbcType=TIMESTAMP}
+            </if>
+            <if test="isDel != null">
+               and  is_del = #{isDel, jdbcType=TINYINT}
+            </if>
+            limit #{limitStart, jdbcType=TINYINT},#{limitPageSize, jdbcType=TINYINT}
+	</select>
+	
+	<!-- 新增用户信息 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.hshc.kfpub.model.CommLoginModel">
+        insert into t_comm_login
+        values(
+            #{id, jdbcType=INTEGER}, 
+            #{loginName, jdbcType=VARCHAR}, 
+            #{loginPwd, jdbcType=VARCHAR}, 
+            #{status, jdbcType=TINYINT},
+            #{validStartDate, jdbcType=TIMESTAMP}, 
+            #{validEndDate, jdbcType=TIMESTAMP},
+            #{isDel, jdbcType=TINYINT}
+        )
+    </insert>
+    
+    <!-- 更新用户信息 -->
+     <update id="update" parameterType="com.hshc.kfpub.model.CommLoginModel">
+        update t_comm_login set
+        	
+            <if test="loginName != null">
+                login_name = #{loginName, jdbcType=VARCHAR},
+            </if>
+            <if test="loginPwd != null">
+                login_pwd = #{loginPwd, jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status = #{status, jdbcType=VARCHAR},
+            </if>
+            <if test="validStartDate != null">
+                valid_start_date = #{validStartDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="validEndDate != null">
+                valid_end_date = #{validEndDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="isDel != null">
+                is_del = #{isDel, jdbcType=TINYINT},
+            </if>
+            id = #{id,jdbcType=INTEGER}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    
+     <!-- 修改密码 -->
+     <update id="updatePwdByUserName">
+        update t_comm_login set
+            login_pwd = #{newPwd, jdbcType=VARCHAR},
+        where login_name = #{loginName, jdbcType=VARCHAR}
+    </update>
+    
+    <!-- 根据ID删除用户信息 -->
+     <delete id="deleteById" parameterType="integer">
+		delete from t_comm_login where id = #{id,jdbcType=INTEGER}
+    </delete>
+</mapper>

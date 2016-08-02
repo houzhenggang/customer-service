@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../kf-config/kf-config.iml" filepath="$PROJECT_DIR$/../kf-config/kf-config.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../kf-controller/kf-controller.iml" filepath="$PROJECT_DIR$/../kf-controller/kf-controller.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../kf-dao/kf-dao.iml" filepath="$PROJECT_DIR$/../kf-dao/kf-dao.iml" />
+      <module fileurl="file://$PROJECT_DIR$/kf-parent.iml" filepath="$PROJECT_DIR$/kf-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../kf-pub/kf-pub.iml" filepath="$PROJECT_DIR$/../kf-pub/kf-pub.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../kf-service/kf-service.iml" filepath="$PROJECT_DIR$/../kf-service/kf-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../kf-serviceproviders/kf-serviceproviders.iml" filepath="$PROJECT_DIR$/../kf-serviceproviders/kf-serviceproviders.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../kf-webconsumer/kf-webconsumer.iml" filepath="$PROJECT_DIR$/../kf-webconsumer/kf-webconsumer.iml" />
+    </modules>
+  </component>
+</project>

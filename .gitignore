@@ -1,0 +1,6 @@
+.svn
+/**/.classpath
+/**/.settings
+/**/target
+/**/.project
+/**/*.iml

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="kf-webconsumer:war">
+    <output-path>$PROJECT_DIR$/../kf-webconsumer/target</output-path>
+    <root id="archive" name="kf-webconsumer.war">
+      <element id="artifact" artifact-name="kf-webconsumer:war exploded" />
+    </root>
+  </artifact>
+</component>

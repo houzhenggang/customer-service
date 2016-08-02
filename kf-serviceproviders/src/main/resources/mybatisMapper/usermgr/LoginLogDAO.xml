@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hshc.kfdao.dao.usermgr.LoginLogDAO" >
+	
+	<resultMap id="loginLogMap" type="com.hshc.kfpub.model.CommLoginLogModel">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="login_type" property="loginType" jdbcType="VARCHAR"/>
+        <result column="login_name" property="loginName" jdbcType="VARCHAR"/>
+        <result column="login_ip" property="loginIp" jdbcType="VARCHAR"/>
+        <result column="login_time" property="loginTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+	<!-- 根据ID查询用户登录日志 -->
+	<select id="selectById" resultMap="loginLogMap" parameterType="integer">
+		select login_type,
+			 login_name,
+			 login_ip,
+			 login_time
+		from t_comm_login_log 
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+
+	<!-- 登录日志信息查询 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.hshc.kfpub.model.CommLoginModel">
+        insert into t_comm_login_log
+        values(
+            #{id, jdbcType=INTEGER}, 
+            #{loginType, jdbcType=VARCHAR}, 
+            #{loginName, jdbcType=VARCHAR}, 
+            #{loginIp, jdbcType=VARCHAR},
+            #{loginTime, jdbcType=TIMESTAMP}
+        )
+    </insert>
+    
+</mapper>

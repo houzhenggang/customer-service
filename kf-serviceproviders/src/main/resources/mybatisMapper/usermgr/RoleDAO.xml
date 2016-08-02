@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hshc.kfdao.dao.usermgr.RoleDAO">
+
+    <resultMap id="roleMap" type="com.hshc.kfpub.model.CommRoleModel">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="role_code" property="roleCode" jdbcType="VARCHAR"/>
+        <result column="role_name" property="roleName" jdbcType="VARCHAR"/>
+        <result column="role_desc" property="roleDesc" jdbcType="VARCHAR"/>
+        <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <association property="creator" columnPrefix="c_" resultMap="com.hshc.kfdao.dao.usermgr.UserDAO.userMapNoLink"/>
+        <association property="lastUpdater" columnPrefix="u_" resultMap="com.hshc.kfdao.dao.usermgr.UserDAO.userMapNoLink"/>
+        <collection property="menuList" columnPrefix="m_" resultMap="com.hshc.kfdao.dao.usermgr.MenuDAO.menuMapNoLink"/>
+        <collection property="privilegeList" columnPrefix="p_" resultMap="com.hshc.kfdao.dao.usermgr.PrivilegeDAO.privMapNoLink"/>
+        <collection property="loginUserList" columnPrefix="lu_" resultMap="com.hshc.kfdao.dao.usermgr.UserDAO.userMapNoLink"/>
+    </resultMap>
+
+    <resultMap id="roleMapNoLink" type="com.hshc.kfpub.model.CommRoleModel">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="role_code" property="roleCode" jdbcType="VARCHAR"/>
+        <result column="role_name" property="roleName" jdbcType="VARCHAR"/>
+        <result column="role_desc" property="roleDesc" jdbcType="VARCHAR"/>
+        <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="columns">
+        r.id, r.role_code, r.role_name, r.role_desc, r.create_date, r.last_update_date, r.creator_id c_id, r.creator_name c_login_name,
+        r.last_updater_id u_id, r.last_updater_name u_login_name
+    </sql>
+
+    <select id="selectCountByParams" parameterType="com.hshc.kfpub.model.CommRoleModel" resultType="_int">
+        select count(*)
+        from t_comm_role
+        where is_del = 0
+    </select>
+
+    <select id="selectByParams" parameterType="com.hshc.kfpub.vo.RoleVo" resultMap="roleMap">
+        select <include refid="columns"/>
+        from t_comm_role r
+        where r.is_del = 0
+        limit #{limitStart, jdbcType=INTEGER}, #{pageSize, jdbcType=INTEGER}
+    </select>
+
+    <select id="selectById" resultMap="roleMap" parameterType="integer">
+        select id, role_code, role_name, role_desc, create_date, last_update_date, creator_id c_id, creator_name c_login_name,
+            last_updater_id u_id, last_updater_name u_login_name
+        from t_comm_role r
+        where r.id = #{id, jdbcType=INTEGER} and r.is_del = 0
+    </select>
+
+    <select id="selectRolesByUserId" resultMap="roleMap" parameterType="integer">
+        select id, role_code, role_name, role_desc, create_date, last_update_date, creator_id c_id, creator_name c_login_name,
+            last_updater_id u_id, last_updater_name u_login_name
+        from t_comm_role r
+        left outer join t_comm_login_role lr
+        on r.id = lr.role_id
+        where lr.login_id = #{userId, jdbcType=INTEGER} and r.is_del = 0
+    </select>
+
+    <select id="selectRolesWithUserFlag" resultMap="roleMap" parameterType="integer">
+        select id, role_code, role_name, role_desc, create_date, last_update_date, creator_id c_id, creator_name c_login_name,
+            last_updater_id u_id, last_updater_name u_login_name, lr_login_id lu_id
+        from t_comm_role r
+        left outer join t_comm_login_role lr
+        on r.id = lr.role_id
+        where (lr.login_id = #{userId, jdbcType=INTEGER} or lr.role_id is null) and r.is_del = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.hshc.kfpub.model.CommRoleModel">
+        insert into t_comm_role
+        values(
+            #{id, jdbcType=INTEGER}, #{roleCode, jdbcType=VARCHAR}, #{roleName, jdbcType=VARCHAR}, #{roleDesc, jdbcType=VARCHAR},
+            #{createDate, jdbcType=TIMESTAMP}, #{creator.id, jdbcType=INTEGER}, #{creator.loginName, jdbcType=VARCHAR},
+            #{lastUpdateDate, jdbcType=TIMESTAMP},#{lastUpdater.id, jdbcType=INTEGER}, #{lastUpdater.loginName, jdbcType=VARCHAR},
+            #{isDel, jdbcType=TINYINT}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.hshc.kfpub.model.CommRoleModel">
+        update t_comm_role
+        <set>
+            <if test="roleCode != null">
+                role_code = #{roleCode, jdbcType=VARCHAR},
+            </if>
+            <if test="roleName != null">
+                role_name = #{roleName, jdbcType=VARCHAR},
+            </if>
+            <if test="roleDesc != null">
+                role_desc = #{roleDesc, jdbcType=VARCHAR},
+            </if>
+            <if test="createDate != null">
+                create_date = #{createDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                <if test="creator.id != null">
+                    creator_id = #{creator.id, jdbcType=INTEGER},
+                </if>
+                <if test="creator.loginName != null">
+                    creator_name = #{creator.loginName, jdbcType=VARCHAR},
+                </if>
+            </if>
+            <if test="lastUpdateDate != null">
+                last_update_date = #{lastUpdateDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastUpdater != null">
+                <if test="lastUpdater.id != null">
+                    last_updater_id = #{lastUpdater.id, jdbcType=INTEGER},
+                </if>
+                <if test="lastUpdater.loginName != null">
+                    last_updater_name = #{lastUpdater.loginName, jdbcType=VARCHAR},
+                </if>
+            </if>
+            <if test="isDel != null">
+                is_del = #{isDel, jdbcType=TINYINT}
+            </if>
+        </set>
+    </update>
+
+    <update id="deleteById" parameterType="integer">
+        update t_comm_role
+        set is_del = 1
+        where id = #{id, jdbcType=INTEGER}
+    </update>
+
+</mapper>

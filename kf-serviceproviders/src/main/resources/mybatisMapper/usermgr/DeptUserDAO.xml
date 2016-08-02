@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hshc.kfdao.dao.usermgr.DeptUserDAO">
+
+	<!-- 删除指定用户与指定的部门的关联关系    一对一 -->
+    <delete id="deleteUserWithDept">
+        delete from t_comm_login_dept
+        where login_id = #{userId, jdbcType=INTEGER} 
+          and dept_id =  #{deptId, jdbcType=INTEGER} 
+    </delete>
+    
+    <!-- 添加用户到指定的部门 -->
+ 	<insert id="insertUserWithDept">
+        insert into t_comm_login_dept
+        values
+           (
+               #{userId, jdbcType=INTEGER}, #{deptId, jdbcType=INTEGER}
+           )
+    </insert>
+    
+    <!-- 删除指定用户与指定的部门的关联关系    一对多 -->
+    <delete id="deleteDeptsWithUser">
+        delete from t_comm_login_dept
+        where login_id = #{userId, jdbcType=INTEGER} 
+    </delete>
+    
+    <!-- 保存用户部门关联，支持一个用户多个部门 -->
+    <insert id="insertDeptsWithUser">
+        insert into t_comm_login_dept
+        values
+        <foreach collection="deptIdList" item="deptId" separator=",">
+            (
+                #{userId, jdbcType=INTEGER}, #{deptId, jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+    
+     <!-- 用户调动所属部门 -->
+     <update id="update">
+        update t_comm_login_dept set
+            dept_id = #{targetDeptId, jdbcType=VARCHAR}
+         where login_id = #{userId, jdbcType=INTEGER} 
+          and dept_id =  #{sourceDeptId, jdbcType=INTEGER} 
+    </update>
+    
+</mapper>

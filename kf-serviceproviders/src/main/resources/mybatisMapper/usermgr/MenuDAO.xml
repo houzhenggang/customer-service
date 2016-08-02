@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hshc.kfdao.dao.usermgr.MenuDAO">
+
+    <resultMap id="menuMap" type="com.hshc.kfpub.model.CommMenuModel">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="menuType" column="menu_type" jdbcType="VARCHAR"/>
+        <result property="menuName" column="menu_name" jdbcType="VARCHAR"/>
+        <result property="menuUrl" column="menu_url" jdbcType="VARCHAR"/>
+        <result property="menuIcon" column="menu_icon" jdbcType="VARCHAR"/>
+        <association property="parentMenu" columnPrefix="p_" resultMap="menuMapNoLink"/>
+        <collection property="subMenuList" columnPrefix="s_" resultMap="menuMapNoLink"/>
+        <collection property="roleList" columnPrefix="r_" resultMap="com.hshc.kfdao.dao.usermgr.RoleDAO.roleMap"/>
+    </resultMap>
+
+    <resultMap id="menuMapNoLink" type="com.hshc.kfpub.model.CommMenuModel">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="menuType" column="menu_type" jdbcType="VARCHAR"/>
+        <result property="menuName" column="menu_name" jdbcType="VARCHAR"/>
+        <result property="menuUrl" column="menu_url" jdbcType="VARCHAR"/>
+        <result property="menuIcon" column="menu_icon" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="columns">
+        m.id, m.menu_icon, m.menu_name, m.menu_type, m.menu_url, m.parent_id p_id
+    </sql>
+
+    <select id="selectAll" resultMap="menuMap">
+        select <include refid="columns"/>
+        from t_comm_menu m
+    </select>
+
+    <select id="selectByUserId" parameterType="integer" resultMap="menuMap">
+        select <include refid="columns"/>, lr.login_id r_u_id
+        from t_comm_menu m
+        inner join t_comm_role_menu rm on m.id = rm.menu_id
+        inner join t_comm_login_role lr on rm.role_id = lr.role_id
+        where lr.login_id = #{userId, jdbcType=INTEGER}
+    </select>
+
+    <select id="selectByRoleId" parameterType="integer" resultMap="menuMap">
+        select <include refid="columns"/>
+        from t_comm_menu m
+        inner join t_comm_role_menu rm on m.id = rm.menu_id
+        where rm.role_id = #{roleId, jdbcType=INTEGER}
+    </select>
+
+    <select id="selectWithRoleFlag" parameterType="integer" resultMap="menuMap">
+        select <include refid="columns"/>, rm.role_id r_id
+        from t_comm_menu m
+        left outer join t_comm_role_menu rm on m.id = rm.menu_id
+        where rm.role_id = #{roleId, jdbcType=INTEGER} or rm.role_id is null
+    </select>
+
+</mapper>

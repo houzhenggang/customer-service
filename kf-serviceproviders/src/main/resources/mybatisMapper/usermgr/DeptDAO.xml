@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hshc.kfdao.dao.usermgr.DeptDAO" >
+	
+	<resultMap id="deptMap" type="com.hshc.kfpub.model.CommDeptModel">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="parent_id" property="parentId" jdbcType="INTEGER"/>
+        <result column="code" property="code" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="alias" property="alias" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="creator_id" property="creatorId" jdbcType="INTEGER"/>
+        <result column="creator_name" property="creatorName" jdbcType="VARCHAR"/>
+        <result column="last_update_time" property="lastUpdateTime" jdbcType="TIMESTAMP"/>
+        <result column="last_updater_id" property="lastUpdaterId" jdbcType="INTEGER"/>
+        <result column="last_updater_name" property="lastUpdaterName" jdbcType="VARCHAR"/>
+        <result column="is_del" property="isDel" jdbcType="VARCHAR"/>
+        <collection property="loginUserList" columnPrefix="u_" resultMap="com.hshc.kfdao.dao.usermgr.UserDAO.userMap"/>
+    </resultMap>
+	<!-- 根据ID查询部门信息 -->
+	<select id="selectById" resultMap="deptMap" parameterType="integer">
+		select tcd.id,
+			 tcd.parent_id,
+			 tcd.code,
+       		 tcd.name,
+			 tcd.alias,
+			 tcd.description,
+			 tcd.create_time,
+			 tcd.last_update_time,
+			 tcd.last_updater_id,
+			 tcd.is_del,
+			 tcl.id l_id,
+			 tcl.login_name l_login_name,
+			 tcl.status l_status
+		from t_comm_dept tcd
+		left join t_comm_login_dept tcld on tcld.dept_id = tcd.id
+		left join t_comm_login tcl on tcl.id = tcld.login_id
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	
+	<!-- 根据查询条件，分页查询记录 -->
+	<select id="selectByParams" resultMap="deptMap" parameterType="com.hshc.kfpub.vo.DeptVo">
+			 select tcd.id,
+				 tcd.parent_id,
+				 tcd.code,
+	       		 tcd.name,
+				 tcd.alias,
+				 tcd.description,
+				 tcd.create_time,
+				 tcd.last_update_time,
+				 tcd.last_updater_id,
+				 tcd.is_del
+			from t_comm_dept 
+			where 1=1
+			 <if test="parentId != null">
+               and parent_id = #{parentId, jdbcType=TINYINT}
+            </if>
+            <if test="code != null">
+               and  code = #{code, jdbcType=VARCHAR}
+            </if>
+            <if test="name != null">
+               and  name = #{name, jdbcType=VARCHAR}
+            </if>
+            <if test="alias != null">
+               and  alias = #{alias, jdbcType=VARCHAR}
+            </if>
+            <if test="description != null">
+               and  description = #{description, jdbcType=VARCHAR}
+            </if>
+            <if test="createTime != null">
+               and  create_time = #{createTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="lastUpdateTime != null">
+               and  last_update_time = #{lastUpdateTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="lastUpdaterId != null">
+               and  last_updater_id = #{lastUpdaterId, jdbcType=VARCHAR}
+            </if>
+            <if test="isDel != null">
+               and  is_del = #{isDel, jdbcType=TINYINT}
+            </if>
+            limit #{limitStart, jdbcType=TINYINT},#{limitPageSize, jdbcType=TINYINT}
+				
+	</select>
+	
+	<!-- 根据父部门ID查询子部门树 -->
+	<select id="selectDeptTreeByDid" resultMap="deptMap" parameterType="integer">
+		select tcd.id,
+			 tcd.parent_id,
+			 tcd.code,
+       		 tcd.name,
+			 tcd.alias,
+			 tcd.description,
+			 tcd.create_time,
+			 tcd.last_update_time,
+			 tcd.last_updater_id,
+			 tcd.is_del
+		from t_comm_dept tcd
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	
+	<!-- 新增部门信息 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.hshc.kfpub.model.CommDeptModel">
+        insert into t_comm_dept
+	        values(
+	        	 #{id, jdbcType=INTEGER},
+				 #{parent_id, jdbcType=INTEGER},
+				 #{code, jdbcType=VARCHAR},
+	       		 #{name, jdbcType=VARCHAR},
+				 #{alias, jdbcType=VARCHAR},
+				 #{description, jdbcType=VARCHAR},
+				 #{create_time, jdbcType=TIMESTAMP},
+				 #{last_update_time, jdbcType=TIMESTAMP},
+				 #{last_updater_id, jdbcType=INTEGER},
+				 #{is_del, jdbcType=INTEGER}
+	        )
+    </insert>
+    
+    <!-- 更新部门信息 -->
+     <update id="update" parameterType="com.hshc.kfpub.model.CommDeptModel">
+        update t_comm_dept set
+       		<if test="parentId != null">
+              parent_id = #{parentId, jdbcType=TINYINT},
+           </if>
+           <if test="code != null">
+              code = #{code, jdbcType=VARCHAR},
+           </if>
+           <if test="name != null">
+              name = #{name, jdbcType=VARCHAR},
+           </if>
+           <if test="alias != null">
+              alias = #{alias, jdbcType=VARCHAR},
+           </if>
+           <if test="description != null">
+              description = #{description, jdbcType=VARCHAR},
+           </if>
+           <if test="createTime != null">
+              create_time = #{createTime, jdbcType=TIMESTAMP},
+           </if>
+           <if test="lastUpdateTime != null">
+              last_update_time = #{lastUpdateTime, jdbcType=TIMESTAMP},
+           </if>
+           <if test="lastUpdaterId != null">
+              last_updater_id = #{lastUpdaterId, jdbcType=VARCHAR},
+           </if>
+           <if test="isDel != null">
+              is_del = #{isDel, jdbcType=TINYINT},
+           </if>
+           id = #{id,jdbcType=INTEGER}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    
+    <!-- 根据ID删除用户信息 -->
+     <delete id="deleteById" parameterType="integer">
+		delete from t_comm_dept where id = #{id,jdbcType=INTEGER}
+    </delete>
+</mapper>
